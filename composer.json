@@ -1,0 +1,58 @@
+{
+    "name": "hwa/email-reader",
+    "description": "A library to read emails from gmail api",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+		"email",
+		"reader"
+	],
+    "authors": [
+        {
+            "name": "daniel",
+            "email": "yhiamdan@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable":true,
+    "require": {
+        "google/apiclient": "^2.0"
+    },
+    "require-dev": {
+        "symfony/thanks": "^1.0",
+        "phpunit/phpunit": "^9.5.20@dev",
+        "mockery/mockery": "^1.0@dev",
+        "illuminate/support": "^v8.83.16@dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "Hwa\\EmailReader\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Hwa\\EmailReader\\Tests\\":"tests/"
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "symfony/thanks": true
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Hwa\\EmailReader\\EmailReaderServiceProvider"
+            ],
+            "aliases": {
+                "Hwa": "Hwa\\EmailReader\\EmailReaderFacade"
+            }
+        }
+    }
+}
