@@ -16,7 +16,8 @@ class CreateUserPageTokenTable extends Migration
         Schema::create('user_page_token', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->unique();
-            $table->string('page_token');
+            $table->string('page_token')->nullable();
+            $table->json('access_token')->nullable();
             $table->timestamps();
         });
     }

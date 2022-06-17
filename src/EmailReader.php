@@ -33,16 +33,15 @@ class EmailReader
 
     /**
      * @param string $code the retrieved auth code after auth login
-     * @return string the access token object returned as string
      * @throws \Exception the exception thrown if access token generation fails
      */
-    public function setAuthCode(string $code): string
+    public function setUserAuthCode($user_id, string $code)
     {
         $accessToken = $this->client->fetchAccessTokenWithAuthCode($code);
         if (array_key_exists('error', $accessToken)) {
             throw new \Exception(join(', ', $accessToken));
         }
-        return json_encode($accessToken);
+        $this->updateUserAccessToken($user_id,$accessToken);
     }
 
     /**
@@ -54,14 +53,15 @@ class EmailReader
     }
 
     /**
-     * @param string $token the access token for the user
+     * @param $user_id
      * @param callable $callback a callback function to call when messages are loaded
      * @throws \Exception
      */
-    public function readEmails(string $token, $user_id, callable $callback)
+    public function readEmails($user_id, callable $callback)
     {
         $page_token = null;
         try {
+            $token = $this->getUserAccessToken($user_id);
             $this->client->setAccessToken(json_decode($token));
             if ($this->client->isAccessTokenExpired()) {
                 if ($this->client->getRefreshToken()) {
@@ -101,7 +101,7 @@ class EmailReader
                 }
             }
         } catch (\Exception $e) {
-            $this->updateUserToken($user_id, $page_token);
+            $this->updateUserPageToken($user_id, $page_token);
             throw new \Exception($e->getMessage());
         }
     }
@@ -115,16 +115,36 @@ class EmailReader
         $user_token = DB::table('user_page_token')->where('user_id', $user_id)->first();
         return $user_token ? $user_token->page_token : null;
     }
+    /**
+     * @param $user_id
+     * @return string|null
+     */
+    private function getUserAccessToken($user_id): ?string
+    {
+        $user_token = DB::table('user_page_token')->where('user_id', $user_id)->first();
+        return $user_token ? $user_token->access_token : null;
+    }
 
     /**
      * @param $user_id
      * @param $page_token
      * @return void
      */
-    private function updateUserToken($user_id, $page_token)
+    private function updateUserPageToken($user_id, $page_token)
     {
         DB::table('user_page_token')->upsert(
-            [['user_id' => $user_id, 'token' => $page_token]], ['user_id'], ['page_token']
+            [['user_id' => $user_id, 'page_token' => $page_token,'access_token'=>json_encode([])]], ['user_id'], ['page_token']
+        );
+    }
+    /**
+     * @param $user_id
+     * @param $page_token
+     * @return void
+     */
+    private function updateUserAccessToken($user_id, $token)
+    {
+        DB::table('user_page_token')->upsert(
+            [['user_id' => $user_id, 'page_token' => null,'access_token'=>json_encode($token)]], ['user_id'], ['access_token']
         );
     }
 }
