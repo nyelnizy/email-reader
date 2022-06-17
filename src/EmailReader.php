@@ -11,12 +11,22 @@ class EmailReader
     private $client;
     private $user = "me";
 
+    /**
+     * @throws \Google\Exception
+     */
     public function __construct()
     {
         $client = new Google_Client();
         $client->setApplicationName('Hwa Email Reader');
         $client->setScopes('https://www.googleapis.com/auth/gmail.readonly');
-        $client->setAuthConfig('credentials.json');
+        $client->setAuthConfig(["installed" => [
+            "client_id" => "83388134340-6jak3b4k53sgpdl9eno4i21frsla4f66.apps.googleusercontent.com",
+            "project_id" => "hwa-email-reader",
+            "auth_uri" => "https://accounts.google.com/o/oauth2/auth",
+            "token_uri" => "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url" => "https://www.googleapis.com/oauth2/v1/certs",
+            "client_secret" => "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",
+            "redirect_uris" => ["http://localhost"]]]);
         $client->setAccessType('offline');
         $this->client = $client;
     }
@@ -91,7 +101,7 @@ class EmailReader
                 }
             }
         } catch (\Exception $e) {
-            $this->updateUserToken($user_id,$page_token);
+            $this->updateUserToken($user_id, $page_token);
             throw new \Exception($e->getMessage());
         }
     }
@@ -100,9 +110,10 @@ class EmailReader
      * @param $user_id
      * @return string|null
      */
-    private function getCurrentPageToken($user_id):?string{
-        $user_token = DB::table('user_page_token')->where('user_id',$user_id)->first();
-        return $user_token?$user_token->page_token:null;
+    private function getCurrentPageToken($user_id): ?string
+    {
+        $user_token = DB::table('user_page_token')->where('user_id', $user_id)->first();
+        return $user_token ? $user_token->page_token : null;
     }
 
     /**
@@ -110,9 +121,10 @@ class EmailReader
      * @param $page_token
      * @return void
      */
-    private function updateUserToken($user_id,$page_token){
+    private function updateUserToken($user_id, $page_token)
+    {
         DB::table('user_page_token')->upsert(
-            [['user_id'=>$user_id,'token'=>$page_token]],['user_id'],['page_token']
+            [['user_id' => $user_id, 'token' => $page_token]], ['user_id'], ['page_token']
         );
     }
 }
