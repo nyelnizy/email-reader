@@ -57,7 +57,7 @@ class EmailReader
      * @param callable $callback a callback function to call when messages are loaded
      * @throws \Exception
      */
-    public function readEmails($user_id, callable $callback)
+    public function readEmails($user_id, callable $callback,$size=500)
     {
         $page_token = null;
         try {
@@ -79,7 +79,7 @@ class EmailReader
                 // options for request
                 $options = [
                     "includeSpamTrash" => true,
-                    "maxResults" => 500,
+                    "maxResults" =>$size,
                     "pageToken" => $page_token
                 ];
                 // read emails with only ids and thread ids
