@@ -62,7 +62,7 @@ class EmailReader
         $page_token = null;
         try {
             $token = $this->getUserAccessToken($user_id);
-            $this->client->setAccessToken(json_decode($token));
+            $this->client->setAccessToken(json_decode($token,true));
             if ($this->client->isAccessTokenExpired()) {
                 if ($this->client->getRefreshToken()) {
                     $this->client->fetchAccessTokenWithRefreshToken($this->client->getRefreshToken());
